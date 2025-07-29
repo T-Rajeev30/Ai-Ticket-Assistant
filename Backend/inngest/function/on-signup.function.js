@@ -17,19 +17,17 @@ export const onUserSignup = inngest.createFunction(
         return userObject;
       });
 
-
-      await step.run("send-welcome-email" , async () => {
-        const subject = `Welcome to the app ` 
+      await step.run("send-welcome-email", async () => {
+        const subject = `Welcome to the app `;
         const message = `Hi, 
         \n \n
-        Thanks for signing up.We're glad to have you onboard! `
-        await sendMail({user.email , subject , message})
+        Thanks for signing up.We're glad to have you onboard! `;
+        await sendMail({ email: user.email, subject, message });
+      });
 
-      })
-
-      return {success: true}
+      return { success: true };
     } catch (error) {
-        console.error("Error running step" , error.message)
+      console.error("Error running step", error.message);
     }
   }
 );
