@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.get("/", authentication, getTickets);
 router.get("/:id", authentication, getTicket);
-router.get("/", authentication, createTicket);
+router.post("/", authentication, createTicket);
 
 export default router;

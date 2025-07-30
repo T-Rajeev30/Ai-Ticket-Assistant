@@ -10,7 +10,7 @@ export const createTicket = async (req, res) => {
         .json({ message: "Title and description are required " });
     }
 
-    const newTicket = Ticket.create({
+    const newTicket = await Ticket.create({
       title,
       description,
       created: req.user._id.toString(),
@@ -19,22 +19,15 @@ export const createTicket = async (req, res) => {
     await inngest.send({
       name: "ticket/created",
       data: {
-        ticketId: (await newTicket)._id.toString(),
-        title,
-        description,
-        createdBy: req.user._id.toString(),
+        ticketId: newTicket._id.toString(),
+        title: newTicket.title,
       },
     });
 
-    return res.status(201).json({
-      message: "Ticket created and processing started",
-      ticket: newTicket,
-    });
+    return res.status(201).json(newTicket);
   } catch (error) {
     console.error("Error creating ticket", error.message);
-    return res.status(500).json({
-      messgae: "Internal server Error",
-    });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -42,10 +35,10 @@ export const createTicket = async (req, res) => {
 export const getTickets = async (req, res) => {
   try {
     const user = req.user;
-    let tickets = [];
+    let tickets;
     if (user.role !== "user") {
       tickets = Ticket.find({})
-        .polygon("assignedTo", ["email", "_id"])
+        .polygon("assignedTo", "email")
         .sort({ createdAt: -1 });
     } else {
       tickets = await Ticket.find({ createdBy: user._id })
@@ -67,10 +60,7 @@ export const getTicket = async (req, res) => {
     let ticket;
 
     if (user.role !== "user") {
-      ticket = Ticket.findById(req.params.id).populate("assignedTo", [
-        "email",
-        "_id",
-      ]);
+      ticket = Ticket.findById(req.params.id).populate("assignedTo", "email");
     } else {
       ticket = Ticket.findOne({
         createdBy: user._id,
