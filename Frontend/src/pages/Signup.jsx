@@ -10,7 +10,7 @@ function Signup() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handelSignup = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -29,7 +29,7 @@ function Signup() {
 
       if (res.ok) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("user ", JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/");
       } else {
         alert(data.message || "signup failed");
@@ -41,7 +41,55 @@ function Signup() {
     }
   };
 
-  return <div>Signup</div>;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-base-200">
+      <div className="card w-full max-w-sm shadow-xl bg-base-100">
+        <form onSubmit={handleSignup} className="card-body">
+          <h2 className="card-title justify-center">Sign Up</h2>
+
+          <input
+            type="text"
+            name="Name"
+            placeholder="Name"
+            className="input input-bordered"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="input input-bordered"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            className="input input-bordered"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+
+          <div className="form-control mt-4">
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={loading}
+            >
+              {loading ? "Signing up..." : "Sign Up"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 export default Signup;
