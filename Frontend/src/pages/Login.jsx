@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-toastify";
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -27,13 +27,15 @@ export default function Login() {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/");
+
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
       } else {
-        alert(data.message || "Login failed");
+        throw new Error(data.error || "Login failed");
       }
     } catch (err) {
-      alert("Something went wrong");
-      console.error(err);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

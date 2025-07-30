@@ -44,7 +44,7 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: "User not Found" });
 
     const ismatch = await bcrypt.compare(password, user.password);
@@ -61,8 +61,16 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    res.json({ user, token });
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+
+    res.json({ user: userResponse, token });
   } catch (error) {
+    console.error("❌ Login Error:", error);
     res.status(500).json({ error: "Login Failed", details: error.message });
   }
 };
