@@ -4,15 +4,20 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
-  const { email, password, skills = [] } = req.body;
+  const { name, email, password, skills = [] } = req.body;
   try {
-    const hashedpassword = bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hashedpassword, skills });
+    const hashedpassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      name,
+      email,
+      password: hashedpassword,
+      skills,
+    });
 
     /// fire inngest event
 
     await inngest.send({
-      name: "user/singup",
+      name: "user/signup",
       data: {
         email,
       },
@@ -30,6 +35,7 @@ export const signup = async (req, res) => {
 
     res.json({ user, token });
   } catch (error) {
+    console.error("❌ Error in signup controller:", error);
     res.status(500).json({ error: "Signup Failed", details: error.message });
   }
 };
