@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import Tickets from "./pages/tickets.jsx";
+import Tickets from "./pages/Tickets.jsx";
 import CheckAdmin from "./components/CheckAuth.jsx";
 import TicketDetailsPage from "./pages/TicketDetailsPage.jsx";
 import Login from "./pages/login.jsx";
