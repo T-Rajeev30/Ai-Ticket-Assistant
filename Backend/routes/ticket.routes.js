@@ -4,6 +4,7 @@ import {
   createTicket,
   getTicket,
   getTickets,
+  updateTicket,
 } from "../controller/ticket.controller.js";
 
 const router = express.Router();
@@ -11,5 +12,7 @@ const router = express.Router();
 router.get("/", authentication, getTickets);
 router.get("/:id", authentication, getTicket);
 router.post("/", authentication, createTicket);
+
+router.patch("/:id", authentication, updateTicket);
 
 export default router;

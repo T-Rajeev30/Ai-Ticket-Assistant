@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CreateTicketForm from "../components/CreateTicketForm";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 function Tickets() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,16 +50,25 @@ function Tickets() {
           <div className="space-y-4">
             {" "}
             {tickets.map((ticket) => (
-              <div key={ticket._id} className="card bg-base-100 shadow-md p-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="card-title text-lg"> {ticket.title} </h4>
-                  <span className="badge badge-primary"> {ticket.status} </span>
+              <Link to={`/tickets/${ticket._id}`} key={tickets._id}>
+                <div
+                  key={ticket._id}
+                  className="card bg-base-100 shadow-md p-4"
+                >
+                  <div className="flex justify-between items-center">
+                    <h4 className="card-title text-lg"> {ticket.title} </h4>
+                    <span className="badge badge-primary">
+                      {" "}
+                      {ticket.status}{" "}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Created on :{" "}
+                    {new Date(ticket.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
-                  Created on : {new Date(ticket.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            ))}{" "}
+              </Link>
+            ))}
           </div>
         ) : (
           <p> You haven't created any tickets yet</p>

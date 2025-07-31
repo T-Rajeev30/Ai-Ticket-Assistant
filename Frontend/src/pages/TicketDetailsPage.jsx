@@ -1,18 +1,47 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import { toast } from "react-toastify";
 
-export default function TicketDetailsPage() {
+function TicketDetailsPage() {
   const { id } = useParams();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
+  const handleStatusChange = async (newStatus) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/tickets/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      const updatedTicketData = await response.json();
+
+      setTicket(updatedTicketData);
+      toast.success("Ticket Status updated ");
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        const res = await fetch(
+        const token = localStorage.getItem("token");
+        const response = await fetch(
           `${import.meta.env.VITE_SERVER_URL}/tickets/${id}`,
           {
             headers: {
@@ -20,15 +49,14 @@ export default function TicketDetailsPage() {
             },
           }
         );
-        const data = await res.json();
-        if (res.ok) {
-          setTicket(data.ticket);
-        } else {
-          alert(data.message || "Failed to fetch ticket");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch ticket deatails");
         }
-      } catch (err) {
-        console.error(err);
-        alert("Something went wrong");
+        const data = await response.json();
+        setTicket(data);
+      } catch (error) {
+        toast.error(error.message);
       } finally {
         setLoading(false);
       }
@@ -38,60 +66,37 @@ export default function TicketDetailsPage() {
   }, [id]);
 
   if (loading)
-    return <div className="text-center mt-10">Loading ticket details...</div>;
-  if (!ticket) return <div className="text-center mt-10">Ticket not found</div>;
+    return <p className="text-center mt-10">Loading ticket details...</p>;
+  if (!ticket) return <p className="text-center mt-10">Ticket not found</p>;
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Ticket Details</h2>
+    <div className=" container mx-auto p-4">
+      <div className="card bg-base-800 shadow-xl p-4">
+        <div className="flex justify-between items-start">
+          <h2 className="card-title text-3xl font-semibold">{ticket.title}</h2>
 
-      <div className="card bg-gray-800 shadow p-4 space-y-4">
-        <h3 className="text-xl font-semibold">{ticket.title}</h3>
-        <p>{ticket.description}</p>
+          {/* Change in the status display to a dropdown*/}
 
-        {/* Conditionally render extended details */}
-        {ticket.status && (
-          <>
-            <div className="divider">Metadata</div>
-            <p>
-              <strong>Status:</strong> {ticket.status}
-            </p>
-            {ticket.priority && (
-              <p>
-                <strong>Priority:</strong> {ticket.priority}
-              </p>
-            )}
+          <select
+            className="select select-bordered"
+            value={ticket.status}
+            onChange={(e) => handleStatusChange(e.target.value)}
+          >
+            <option>Open</option>
+            <option>In Progress</option>
+            <option>Closed</option>
+          </select>
+        </div>
+        <p className="mt-4 text-gray-700">{ticket.description}</p>
 
-            {ticket.relatedSkills?.length > 0 && (
-              <p>
-                <strong>Related Skills:</strong>{" "}
-                {ticket.relatedSkills.join(", ")}
-              </p>
-            )}
+        <div className="divider"> </div>
 
-            {ticket.helpfulNotes && (
-              <div>
-                <strong>Helpful Notes:</strong>
-                <div className="prose max-w-none rounded mt-2">
-                  <ReactMarkdown>{ticket.helpfulNotes}</ReactMarkdown>
-                </div>
-              </div>
-            )}
-
-            {ticket.assignedTo && (
-              <p>
-                <strong>Assigned To:</strong> {ticket.assignedTo?.email}
-              </p>
-            )}
-
-            {ticket.createdAt && (
-              <p className="text-sm text-gray-500 mt-2">
-                Created At: {new Date(ticket.createdAt).toLocaleString()}
-              </p>
-            )}
-          </>
-        )}
+        <p className="text-sm text-gray-500">
+          Created on: {new Date(ticket.createdAt).toLocaleString()}
+        </p>
       </div>
     </div>
   );
 }
+
+export default TicketDetailsPage;

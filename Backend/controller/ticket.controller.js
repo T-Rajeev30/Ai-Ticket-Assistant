@@ -1,3 +1,4 @@
+import { err } from "inngest/types";
 import { inngest } from "../inngest/client.inngest.js";
 import Ticket from "../models/ticket.model.js";
 
@@ -79,5 +80,33 @@ export const getTicket = async (req, res) => {
   } catch (error) {
     console.error("Error fetching ticket ", error.message);
     return res.status(500).json({ message: "Internal Server  Error" });
+  }
+};
+
+//// updating ticket
+
+export const updateTicket = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+    if (!status) {
+      return res.status(400).json({ error: "Status is required. " });
+    }
+
+    // find the ticket ans update it
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      id,
+      {
+        status,
+      },
+      { new: true }
+    );
+
+    if (!updateTicket) {
+      return res.status(404).json({ error: "Ticket not found." });
+    }
+    res.status(200).json(updatedTicket);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update ticket" });
   }
 };
