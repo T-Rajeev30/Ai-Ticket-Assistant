@@ -55,19 +55,28 @@ export const onTicketCreated = inngest.createFunction(
       if (user) {
         await Ticket.findByIdAndUpdate(ticket._id, { assignedTo: user._id });
       }
-      return user;
+      return user ? user.toObject() : null;
     });
 
     // Step 4: Send a notification email.
-    // await step.run("send-email-notification", async () => {
-    //   if (agent) {
-    //     await sendMail(
-    //       agent.email,
-    //       "New Ticket Assigned",
-    //       `A new ticket has been assigned to you: "${ticket.title}"`
-    //     );
-    //   }
-    // });
+    await step.run("send-email-notification", async () => {
+      console.log("--- DEBUG: Data received by email step ---");
+      console.log("Agent object:", agent);
+      console.log("Agent email:", agent?.email);
+      console.log("-----------------------------------------");
+
+      if (agent && agent.email) {
+        await sendMail({
+          email: agent.email,
+          subject: "New Ticket Assigned",
+          message: `A new ticket has been assigned to you: "${ticket.title}"`,
+        });
+      } else {
+        console.warn(
+          "Could not send email: Assigned agent has no email address."
+        );
+      }
+    });
 
     return { success: true };
   }

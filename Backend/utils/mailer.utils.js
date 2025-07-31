@@ -1,22 +1,22 @@
+import "dotenv/config";
 import nodemailer from "nodemailer";
-
-export const sendMail = async (to, subject, text) => {
+export const sendMail = async ({ email, subject, message }) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.MAILTRAP_SMTP_HOST,
-      port: process.env.MAILTRAP_SMTP_PORT,
+      host: process.env.MAIL_HOST,
+      port: process.env.MAIL_PORT,
       secure: false,
       auth: {
-        user: process.env.MAILTRAP_SMTP_USER,
-        pass: process.env.MAILTRAP_SMTP_PASS,
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
       },
     });
 
     const info = await transporter.sendMail({
-      from: "Inngest TMS",
-      to,
-      subject,
-      text,
+      from: '"AI Ticket Assistant" <from@example.com>',
+      to: email,
+      subject: subject,
+      text: message,
     });
     console.log("Message Sent:", info.messageId);
     return info;
