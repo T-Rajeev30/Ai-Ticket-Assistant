@@ -46,7 +46,7 @@ export const getTickets = async (req, res) => {
         .sort({ createdAt: -1 });
     } else {
       tickets = await Ticket.find({ createdBy: user._id })
-        .select("title description status createdAt")
+        .populate("assignedTo", "email")
         .sort({ createdAt: -1 });
     }
     return res.status(200).json(tickets);
@@ -72,7 +72,7 @@ export const getTicket = async (req, res) => {
       ticket = await Ticket.findOne({
         createdBy: user._id,
         _id: req.params.id,
-      }).select("Title description status createdAt ");
+      }).populate("assignedTo", "email");
     }
 
     if (!ticket) {

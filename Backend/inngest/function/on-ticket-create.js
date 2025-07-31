@@ -24,15 +24,18 @@ export const onTicketCreated = inngest.createFunction(
 
     // Step 2: Update the ticket with AI results.
     await step.run("update-ticket-with-ai-data", async () => {
-      if (!aiResponse) return;
-      await Ticket.findByIdAndUpdate(ticket._id, {
-        priority: !["low", "medium", "high"].includes(aiResponse.priority)
-          ? "medium"
-          : aiResponse.priority,
-        helpfulNotes: aiResponse.helpfulNotes,
-        status: "IN_PROGRESS",
-        relatedSkills: aiResponse.relatedSkills,
-      });
+      const updateData = { status: "IN_PROGRESS" };
+
+      if (aiResponse) {
+        if (aiResponse.summary) updateData.summary = aiResponse.summary; // 2. Add summary to the update
+
+        if (aiResponse.priority) updateData.priority = aiResponse.priority;
+        if (aiResponse.helpfulNotes)
+          updateData.helpfulNotes = aiResponse.helpfulNotes;
+        if (aiResponse.relatedSkills)
+          updateData.relatedSkills = aiResponse.relatedSkills;
+      }
+      await Ticket.findByIdAndUpdate(ticket._id, updateData);
     });
 
     const skillsToMatch = aiResponse?.relatedSkills || [];
@@ -42,7 +45,7 @@ export const onTicketCreated = inngest.createFunction(
       let user = null;
       if (skillsToMatch.length > 0) {
         user = await User.findOne({
-          role: { $in: ["Agent", "Moderator", "Admin"] },
+          role: { $in: ["Agent", "Admin"] },
           skills: { $in: skillsToMatch },
         });
       }
@@ -56,15 +59,15 @@ export const onTicketCreated = inngest.createFunction(
     });
 
     // Step 4: Send a notification email.
-    await step.run("send-email-notification", async () => {
-      if (agent) {
-        await sendMail(
-          agent.email,
-          "New Ticket Assigned",
-          `A new ticket has been assigned to you: "${ticket.title}"`
-        );
-      }
-    });
+    // await step.run("send-email-notification", async () => {
+    //   if (agent) {
+    //     await sendMail(
+    //       agent.email,
+    //       "New Ticket Assigned",
+    //       `A new ticket has been assigned to you: "${ticket.title}"`
+    //     );
+    //   }
+    // });
 
     return { success: true };
   }

@@ -10,66 +10,56 @@ const analyzeTicket = async (ticket) => {
       apiKey: process.env.GEMINI_API_KEY,
     }),
     name: "AI Ticket Triage Assistance",
-    system: ` You are an expert AI assistant that processes techincal support tickets.
-
-      Your job is to :
-      1. Summarize the issue.
-      2. Estimate its priority.
-      3. Provide helpful notes and resources links for human moderators.
-      4. List relevant techincal skills required.
-
-      IMPORTANT :
-      - Respond with *only* valid raw JSON.
-      - Do NOT include markdown , code fences , comments , or any extra formatting.
-      - The format must be a raw JSON object.
-
-      Repeat: Do not wrap your output in markdown or code fences.    `,
+    system: ` You are an expert AI assistant for a technical support ticketing system.
+    Your job is to analyze a ticket and respond with *only* a raw JSON object.
+    The JSON object must contain these exact keys: "summary", "priority", "helpfulNotes", "relatedSkills".
+    If you cannot determine a value for a key, you MUST return an empty string "" for strings or an empty array [] for arrays.
+    Do NOT include markdown, code fences, or any other text outside of the JSON object.`,
   });
 
   const response =
-    await supportAgent.run(`You are a ticket triage agent Only return a strict JSON object with no extra text,
-      headers , or markdown.
+    await supportAgent.run(`Analyze the following support ticket and provide a JSON object with:
+- summary: A short 1-2 sentence summary of the issue.
+- priority: One of "low", "medium", or "high".
+- helpfulNotes: A detailed technical explanation for a moderator.
+- relatedSkills: An array of relevant skills required.
 
-      Analyze the following support ticket and provide a JSON object with:
-
-  - summary: A short 1-2 sentence summary of the issue.
-  - priority: One of "low", "medium", or "high".
-  - helpfulNotes: A detailed technical explanation that a moderator can use to solve this issue. Include useful external links or resources if possible.
-  - relatedSkills: An array of relevant skills required to solve the issue (e.g., ["React", "MongoDB"]).
-
-  Respond ONLY in this JSON format and do not include any other text or markdown in the answer:
-
-  {
+Respond ONLY in this JSON format:
+{
   "summary": "Short summary of the ticket",
   "priority": "high",
   "helpfulNotes": "Here are useful tips...",
   "relatedSkills": ["React", "Node.js"]
-  }
+}
 
-  ---
-
-  Ticket information:
-
-  - Title: ${ticket.title}
-  - Description: ${ticket.description}
-
-      `);
+---
+Ticket information:
+- Title: ${ticket.title}
+- Description: ${ticket.description}
+    `);
 
   // console.log("Full AI Response:", JSON.stringify(response, null, 2));
 
   const raw = response.output[0]?.content;
 
-  if (typeof raw !== "string") {
+  if (typeof raw !== "string" || raw.trim() === "") {
     console.error("AI response context is missing or not a string.");
     return null;
   }
 
   try {
-    const match = raw.match(/```json\s*([\s\S]*?)\s*```/i);
-    const jsonString = match ? match[1] : raw.trim();
+    // This logic finds the JSON even if it's wrapped in markdown
+    const match = raw.match(/{[\s\S]*}/);
+    if (!match) {
+      throw new Error("No JSON object found in the AI response.");
+    }
+    const jsonString = match[0];
     return JSON.parse(jsonString);
   } catch (e) {
-    console.log("Failed to pass json from AI response " + e.message);
+    console.error("Failed to parse JSON from AI response:", e.message);
+    console.error("--- Raw AI Response that failed parsing ---");
+    console.error(raw);
+    console.error("--- End of Raw AI Response ---");
     return null;
   }
 };
