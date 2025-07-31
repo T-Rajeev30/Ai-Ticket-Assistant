@@ -8,6 +8,7 @@ import { serve } from "inngest/express";
 import { inngest } from "./inngest/client.inngest.js";
 import { onUserSignup } from "./inngest/function/on-signup.function.js";
 import { onTicketCreated } from "./inngest/function/on-ticket-create.js";
+import { testFunction } from "./inngest/function/test.js";
 
 const PORT = process.env.PORT || 3000;
 //console.log(PORT);
@@ -25,7 +26,7 @@ app.use(
   "/api/inngest",
   serve({
     client: inngest,
-    functions: [onUserSignup, onTicketCreated],
+    functions: [onUserSignup, onTicketCreated, testFunction],
   })
 );
 

@@ -7,6 +7,7 @@ const ticketSchema = new mongoose.Schema(
     description: { type: String, required: true },
     status: { type: String, default: "TODO" },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    relatedSkills: [String],
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

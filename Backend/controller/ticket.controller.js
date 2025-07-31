@@ -4,7 +4,7 @@ import Ticket from "../models/ticket.model.js";
 
 export const createTicket = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, relatedSkills = [] } = req.body;
     if (!title || !description) {
       return res
         .status(400)
@@ -14,6 +14,7 @@ export const createTicket = async (req, res) => {
     const newTicket = await Ticket.create({
       title,
       description,
+      relatedSkills,
       createdBy: req.user._id,
     });
 
@@ -22,6 +23,8 @@ export const createTicket = async (req, res) => {
       data: {
         ticketId: newTicket._id.toString(),
         title: newTicket.title,
+        /////////////
+        requiredSkills: newTicket.relatedSkills,
       },
     });
 

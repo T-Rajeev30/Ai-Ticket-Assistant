@@ -51,10 +51,7 @@ function Tickets() {
             {" "}
             {tickets.map((ticket) => (
               <Link to={`/tickets/${ticket._id}`} key={tickets._id}>
-                <div
-                  key={ticket._id}
-                  className="card bg-base-100 shadow-md p-4"
-                >
+                <div className="card bg-base-100 shadow-md p-4 hover:bg-base-200 transition-colors">
                   <div className="flex justify-between items-center">
                     <h4 className="card-title text-lg"> {ticket.title} </h4>
                     <span className="badge badge-primary">
