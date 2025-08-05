@@ -1,32 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
 
-const CheckAdmin = ({ children, protectedRoute }) => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+function CheckAuth({ children, protectedRoute }) {
+  const token = localStorage.getItem("token");
+  const location = useLocation();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (protectedRoute) {
-      if (!token) {
-        navigate("/login");
-      } else {
-        setLoading(false);
-      }
-    } else {
-      if (token) {
-        navigate("/");
-      } else {
-        setLoading(false);
-      }
+  if (protectedRoute) {
+    // If the route is protected and the user is NOT logged in, redirect.
+    if (!token) {
+      return <Navigate to="/login" state={{ from: location }} replace />;
     }
-  }, [navigate, protectedRoute]);
-
-  if (loading) {
-    return <div> loading...</div>;
+  } else {
+    // If the route is public-only and the user IS logged in, redirect.
+    if (token) {
+      return <Navigate to="/dashboard" state={{ from: location }} replace />;
+    }
   }
-  return children;
-};
 
-export default CheckAdmin;
+  // If no redirection is needed, render the page.
+  return children;
+}
+
+export default CheckAuth;

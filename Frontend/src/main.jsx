@@ -1,9 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import LandingPage from "./pages/LandingPage.jsx";
 
 import Tickets from "./pages/Tickets.jsx";
 import CheckAdmin from "./components/CheckAuth.jsx";
@@ -25,17 +27,20 @@ createRoot(document.getElementById("root")).render(
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme="dark"
       />
       <Routes>
+        <Route path="/" element={<LandingPage />} />
+
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <CheckAdmin protectedRoute={true}>
               <Tickets />
             </CheckAdmin>
           }
-        />
+        ></Route>
+
         <Route
           path="/tickets/:id"
           element={
