@@ -1,80 +1,58 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import LandingPage from "./pages/LandingPage.jsx";
-
-import Tickets from "./pages/Tickets.jsx";
-import CheckAdmin from "./components/CheckAuth.jsx";
-import TicketDetailsPage from "./pages/TicketDetailsPage.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+
+import AppLayout from "./components/AppLayout.jsx";
+import CheckAuth from "./components/CheckAuth.jsx";
+import Tickets from "./pages/Tickets.jsx";
 import Admin from "./pages/Admin.jsx";
+import TicketDetailsPage from "./pages/TicketDetailsPage.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
+      <ToastContainer position="top-right" autoClose={5000} theme="dark" />
       <Routes>
+        {/* --- Public Routes --- */}
         <Route path="/" element={<LandingPage />} />
-
-        <Route
-          path="/dashboard"
-          element={
-            <CheckAdmin protectedRoute={true}>
-              <Tickets />
-            </CheckAdmin>
-          }
-        ></Route>
-
-        <Route
-          path="/tickets/:id"
-          element={
-            <CheckAdmin protectedRoute={true}>
-              <TicketDetailsPage />
-            </CheckAdmin>
-          }
-        />
-
         <Route
           path="/login"
           element={
-            <CheckAdmin protectedRoute={false}>
+            <CheckAuth protectedRoute={false}>
               <Login />
-            </CheckAdmin>
+            </CheckAuth>
           }
         />
-
         <Route
           path="/signup"
           element={
-            <CheckAdmin protectedRoute={false}>
+            <CheckAuth protectedRoute={false}>
               <Signup />
-            </CheckAdmin>
+            </CheckAuth>
           }
         />
+
+        {/* --- Protected Routes --- */}
+        {/* This parent route handles authentication and renders the AppLayout */}
         <Route
-          path="/admin"
           element={
-            <CheckAdmin protectedRoute={true}>
-              <Admin />
-            </CheckAdmin>
+            <CheckAuth protectedRoute={true}>
+              <AppLayout />
+            </CheckAuth>
           }
-        />
+        >
+          {/* These child routes will now render inside AppLayout's <Outlet /> */}
+          <Route path="/dashboard" element={<Tickets />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/tickets/:id" element={<TicketDetailsPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   </StrictMode>

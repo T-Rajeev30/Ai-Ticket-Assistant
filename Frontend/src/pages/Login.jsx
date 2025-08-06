@@ -29,11 +29,13 @@ export default function Login() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        setTimeout(() => {
+        if (data.user.role === "Admin" || data.user.role === "Agent") {
+          setTimeout(() => {
+            navigate("/admin");
+          }, 1000);
+        } else {
           navigate("/dashboard");
-        }, 1000);
-      } else {
-        throw new Error(data.error || "Login failed");
+        }
       }
     } catch (err) {
       toast.error(err.message);
