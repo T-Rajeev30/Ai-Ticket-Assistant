@@ -42,12 +42,13 @@ export const getTickets = async (req, res) => {
     let tickets;
     if (user.role !== "user") {
       tickets = await Ticket.find({})
+        .populate("createdBy", "email")
         .populate("assignedTo", "email")
         .sort({ createdAt: -1 });
     } else {
-      tickets = await Ticket.find({ createdBy: user._id })
-        .populate("assignedTo", "email")
-        .sort({ createdAt: -1 });
+      tickets = await Ticket.find({ createdBy: user._id }).sort({
+        createdAt: -1,
+      });
     }
     return res.status(200).json(tickets);
   } catch (error) {
